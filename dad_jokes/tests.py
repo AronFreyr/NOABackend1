@@ -1,16 +1,19 @@
+"""Tests for the Dad Jokes API."""
+
+# This is a hack that needs to be done to get PyCharm to recognize the Django environment and run Django tests properly.
+# It also needs to be the first thing in the file, before any imports that depend on Django settings.
+# -------------
 import os
-# This needs to be done to get PyCharm to recognize the Django environment and run Django tests properly.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NOABackend1.settings')
 os.environ.setdefault('ENVIRONMENT', 'test')  # Set the environment to 'test' for testing purposes
 import django
 django.setup()
+# -------------
 
+import requests
 from django.test import TestCase
+from django.conf import settings  # Get the EXTERNAL_API_URL from the settings
 
-# Get the EXTERNAL_API_URL from the settings
-from django.conf import settings
-
-# Create your tests here.
 
 class DadJokesFromAPI(TestCase):
     """
@@ -18,16 +21,15 @@ class DadJokesFromAPI(TestCase):
     """
 
     def setUp(self):
-        self.api_url = settings.EXTERNAL_API_URL
+        self.api_url: str = settings.EXTERNAL_API_URL
 
-    def test_get_joke(self):
+    def test_get_joke_from_api(self):
         """
         Test that we can retrieve a joke from the API.
         """
-        # Here you would typically make a request to the API and check the response
-        # For example:
-        # response = self.client.get('/api/dad-jokes/')
-        # self.assertEqual(response.status_code, 200)
-        # self.assertIn('joke', response.json())
-        print("This is a placeholder for the actual API test.")
-        print(self.api_url)
+        headers = {'Accept': 'application/json'}
+        resp = requests.get(self.api_url, headers=headers, timeout=1)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn('joke', data)
+        self.assertIn('id', data)
