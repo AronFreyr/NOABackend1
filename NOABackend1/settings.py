@@ -9,12 +9,16 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
+import configparser
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Location for configuration files.
+CONFIG_DIR = BASE_DIR / 'NOABackend1' / 'config'
+config = configparser.ConfigParser(allow_no_value=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -22,8 +26,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-aw2dc+bmgi-yi(i#q08!t_7x4r&wsy8+s!dt@kx_m$#fe9^=$a'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# An environment should be defined when running the application.
+if 'ENVIRONMENT' not in os.environ:
+    raise EnvironmentError("Environment variable 'ENVIRONMENT' is not set.")
+
+# Currently we only support 'test' and 'prod' environments.
+env = os.environ['ENVIRONMENT']
+if env == 'test':
+    config.read(CONFIG_DIR / 'dev.ini')
+    DEBUG = True
+elif env == 'prod':
+    config.read(CONFIG_DIR / 'prod.ini')
+    DEBUG = False
+else:
+    raise ValueError(f"Unknown environment: {env}")
+
+assert CONFIG_DIR.exists()
+EXTERNAL_API_URL = config.get('DEFAULT', 'EXTERNAL_API_URL')
 
 ALLOWED_HOSTS = []
 
