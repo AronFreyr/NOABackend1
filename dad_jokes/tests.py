@@ -48,10 +48,13 @@ class DadJokesFromAPI(TestCase):
 
     @patch('dad_jokes.views.get_dad_joke_from_api')
     def test_store_dad_joke_through_view(self, mock_get_joke):
+
         # TODO: This test does not seem to run the django test database setup properly.
+        # TODO: I can run the tests using the command line, but I would really like to be able to run them from PyCharm.
         dad_joke = DadJokeObj(joke="Test joke", site_id="12345")
         mock_get_joke.return_value = dad_joke
 
         resp = self.client.get(reverse('dad_jokes:store_dad_joke_from_api'))
 
         self.assertTrue(DadJoke.objects.filter(site_id='12345').exists())
+

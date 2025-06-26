@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 
 from dad_jokes.utils import get_dad_joke_from_api, DadJoke as DadJokeObj
 from dad_jokes.models import DadJoke
@@ -20,6 +21,9 @@ def store_dad_joke_from_api(request):
     if not DadJoke.objects.filter(site_id=dad_joke.site_id).exists():
         new_dad_joke = DadJoke(joke=dad_joke.joke, site_id=dad_joke.site_id)
         new_dad_joke.save()
+        resp = HttpResponse(f"Stored new dad joke: {new_dad_joke.joke}")
     else:
         # TODO: Log if the joke already exists
-        pass
+        resp = HttpResponse(f"Joke with ID {dad_joke.site_id} already exists. Not storing again.")
+
+    return resp
