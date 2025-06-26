@@ -32,7 +32,7 @@ if 'ENVIRONMENT' not in os.environ:
 
 # Currently we only support 'test' and 'prod' environments.
 env = os.environ['ENVIRONMENT']
-if env == 'test':
+if env == 'dev':
     config.read(CONFIG_DIR / 'dev.ini')
     DEBUG = True
 elif env == 'prod':
@@ -91,13 +91,20 @@ WSGI_APPLICATION = 'NOABackend1.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if env == 'prod':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+if env == 'dev':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'test_db.sqlite3',
+        }
+    }
 
 
 # Password validation

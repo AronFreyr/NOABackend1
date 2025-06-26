@@ -5,7 +5,7 @@
 # -------------
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NOABackend1.settings')
-os.environ.setdefault('ENVIRONMENT', 'test')  # Set the environment to 'test' for testing purposes
+os.environ.setdefault('ENVIRONMENT', 'dev')  # Set the environment to 'test' for testing purposes
 import django
 django.setup()
 # -------------
@@ -13,6 +13,11 @@ django.setup()
 import requests
 from django.test import TestCase
 from django.conf import settings  # Get the EXTERNAL_API_URL from the settings
+from django.urls import reverse
+from dad_jokes.utils import get_dad_joke_from_api
+from unittest.mock import patch
+from dad_jokes.models import DadJoke
+from dad_jokes.utils import DadJoke as DadJokeObj
 
 
 class DadJokesFromAPI(TestCase):
@@ -33,3 +38,20 @@ class DadJokesFromAPI(TestCase):
         data = resp.json()
         self.assertIn('joke', data)
         self.assertIn('id', data)
+
+    def test_get_joke_util(self):
+        """Get a joke using the utility function."""
+        dad_joke = get_dad_joke_from_api()
+        self.assertIsInstance(dad_joke.joke, str)
+        self.assertIsInstance(dad_joke.site_id, str)
+        self.assertGreater(len(dad_joke.joke), 0)
+
+    @patch('dad_jokes.views.get_dad_joke_from_api')
+    def test_store_dad_joke_through_view(self, mock_get_joke):
+        # TODO: This test does not seem to run the django test database setup properly.
+        dad_joke = DadJokeObj(joke="Test joke", site_id="12345")
+        mock_get_joke.return_value = dad_joke
+
+        resp = self.client.get(reverse('dad_jokes:store_dad_joke_from_api'))
+
+        self.assertTrue(DadJoke.objects.filter(site_id='12345').exists())
