@@ -33,8 +33,6 @@ def locally_stored_dad_joke(request, joke_id):
     """
     Handle GET, PUT, DELETE requests for a dad joke with the given ID.
     """
-
-
     if request.method == 'GET':
         try:
             dad_joke = DadJoke.objects.get(id=joke_id)
@@ -44,7 +42,7 @@ def locally_stored_dad_joke(request, joke_id):
 
     elif request.method == 'PUT':
         # Update the joke text
-        joke_text = request.POST.get('joke')
+        joke_text = json.loads(request.body).get('joke')
         if joke_text:
             try:
                 dad_joke = DadJoke.objects.get(id=joke_id)
@@ -71,6 +69,7 @@ def locally_stored_dad_joke(request, joke_id):
 def store_new_dad_joke(request):
     """
     Stores a dad joke that is not from the external API.
+    Since the joke is not from the API, it will be stored with a local site_id.
     """
     if request.method == 'POST':
         joke_text = json.loads(request.body).get('joke')

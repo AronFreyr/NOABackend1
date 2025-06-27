@@ -58,3 +58,32 @@ class DadJokesFromAPI(TestCase):
 
         self.assertTrue(DadJoke.objects.filter(site_id='12345').exists())
 
+
+class DadJokeCrudOperations(TestCase):
+    """
+    Test case for CRUD operations on Dad Jokes.
+    """
+
+    def setUp(self):
+        self.dad_joke = DadJoke.objects.create(joke="This is a test joke", site_id="test123")
+
+    def test_get_dad_joke(self):
+        """Test retrieving a dad joke."""
+        response = self.client.get(reverse('dad_jokes:locally_stored_dad_joke', args=[self.dad_joke.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("This is a test joke", response.content.decode())
+
+    def test_update_dad_joke(self):
+        """Test updating a dad joke."""
+        response = self.client.put(reverse('dad_jokes:locally_stored_dad_joke', args=[self.dad_joke.id]),
+                                   data={'joke': 'Updated joke'}, content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.dad_joke.refresh_from_db()
+        self.assertEqual(self.dad_joke.joke, 'Updated joke')
+
+    def test_delete_dad_joke(self):
+        """Test deleting a dad joke."""
+        response = self.client.delete(reverse('dad_jokes:locally_stored_dad_joke', args=[self.dad_joke.id]))
+        print(f"response: {response.content.decode()}")
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(DadJoke.objects.filter(id=self.dad_joke.id).exists())
